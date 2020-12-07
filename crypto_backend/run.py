@@ -1,11 +1,10 @@
+import os
+import time
 from aiohttp import web
 
-routes = web.RouteTableDef()
+from app.app import APPLICATION
+from config.config import CONFIG
 
-@routes.get('/')
-async def hello(request):
-    return web.Response(text="Hello HPPL course")
 
-app = web.Application()
-app.add_routes(routes)
-web.run_app(app)
+if __name__ == '__main__':
+    web.run_app(APPLICATION, port=CONFIG['port'])
