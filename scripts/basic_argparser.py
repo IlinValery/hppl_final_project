@@ -6,7 +6,7 @@ parser = argparse.ArgumentParser()
 group = parser.add_mutually_exclusive_group()
 group.add_argument('-i', '--input-image', type=str, help='Path to the bmp/png image', default='../data/image.bmp')
 group.add_argument('-o', '--output-image', type=str, help='Path to the bmp/png image for saving',
-                   default='../data/outputs/out.bpm')
+                   default='../data/outputs/out.bpmпше згдд')
 group.add_argument('-k', '--key', type=str, help='Path to the txt file with key', default='../data/key.txt')
 group.add_argument('-f', '--file', type=str, help='Path to the txt file with message for encrypt',
                    default='../data/texts/default.txt')
