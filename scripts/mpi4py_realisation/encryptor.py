@@ -11,6 +11,37 @@ rank = comm.Get_rank()
 
 alphabet = list(string.ascii_lowercase + string.digits)
 
+def encrypt_func(image, text, key):
+    imgSize = image.shape[0] * image.shape[1]
+    textSize = len(text)
+
+    assert len(text) > 0, "Empty text file"
+    assert textSize < imgSize, "Image is too small"
+
+    #     добавляем ноль (ноль как число!) в самый конец текста
+    text += '\0'
+    textSize += 1
+
+    np.random.seed(getSeed(key))
+
+    wpixs = []
+    for i in range(textSize):
+        while True:
+            ix = np.random.randint(0, image.shape[0] - 1)
+            iy = np.random.randint(0, image.shape[1] - 1)
+            if (ix, iy) not in wpixs:
+                wpixs.append((ix, iy))
+                break
+        thisChar = ord(text[i])
+        if thisChar > 1000:
+            thisChar -= 890  # костыль для русских букв
+        thisColor = image[ix, iy]
+        #          упаковка в RGB 323
+        image[ix, iy, 0] = (image[ix, iy, 0] & (0x1F << 3)) | ((thisChar & 0xE0) >> 5)
+        image[ix, iy, 1] = (image[ix, iy, 1] & (0x3F << 2)) | ((thisChar & 0x18) >> 3)
+        image[ix, iy, 2] = (image[ix, iy, 2] & (0x1F << 3)) | (thisChar & 0x7)
+    return image
+
 
 def encrypt(input_img, text, key, out_path="crypt_image.bmp"):
     try:
@@ -23,7 +54,6 @@ def encrypt(input_img, text, key, out_path="crypt_image.bmp"):
     assert process_num == size, "Number of processes doesn't correspond to required one from the key!"
 
     image = input_img.copy()
-    image = image[:len(image) // size * size]
 
     # Shuffle initial image and define keys for each rank
     np.random.seed(getSeed(key))
@@ -34,60 +64,25 @@ def encrypt(input_img, text, key, out_path="crypt_image.bmp"):
 
     # Write text into pixels using a unique key
     key = keys[rank]
-    np.random.seed(getSeed(key))
 
-    numTextPerRank = len(text) // size
-    if rank == size - 1:
-        text = text[rank * numTextPerRank:]
-    else:
-        text = text[rank * numTextPerRank:(rank + 1) * numTextPerRank]
+    image = np.array_split(image, size, axis=0)
+    text = list(map(lambda x: ''.join(x), np.array_split(list(text), size)))
 
-    numImgPerRank = image.shape[0] // size
-    image = image[rank * numImgPerRank:(rank + 1) * numImgPerRank, :]
+    image = image[rank]
+    text = text[rank]
 
-    imgSize = image.shape[0] * image.shape[1]
-    textSize = len(text)
-        
-    assert len(text) > 0, "Empty text file"
-    assert textSize < imgSize, "Image is too small"
+    image = encrypt_func(image, text, key)
 
-#     добавляем ноль (ноль как число!) в самый конец текста
-    text += '\0'
-    textSize += 1
-
-    wpixs = []
-    for i in range(textSize):
-        while True:
-            ix = np.random.randint(0, image.shape[0]-1)
-            iy = np.random.randint(0, image.shape[1]-1)
-            if (ix, iy) not in wpixs:
-                wpixs.append((ix, iy))
-                break
-        thisChar = ord(text[i])
-        if thisChar > 1000:
-            thisChar -= 890 #  костыль для русских букв
-        thisColor = image[ix, iy]
-#          упаковка в RGB 323
-        image[ix, iy, 0] = (image[ix, iy, 0] & (0x1F << 3)) | ((thisChar & 0xE0) >> 5)
-        image[ix, iy, 1] = (image[ix, iy, 1] & (0x3F << 2)) | ((thisChar & 0x18) >> 3)
-        image[ix, iy, 2] = (image[ix, iy, 2] & (0x1F << 3)) | (thisChar & 0x7)
-
-    sendbuf = image
-
-    recvbuf = None
+    image = comm.gather(image, root=0)
     if rank == 0:
-        recvbuf = np.empty((numImgPerRank * size, image.shape[1], image.shape[2]), dtype=np.uint8)
-
-    comm.Gather(sendbuf, recvbuf, root=0)
-
-    if rank == 0:
+        image = np.concatenate(image, 0)
         np.random.seed(getSeed(initial_key))
-        order = np.arange(len(recvbuf))
+        order = np.arange(image.shape[0])
         np.random.shuffle(order)
         order = order.argsort()
-        recvbuf = recvbuf[order]
+        image = image[order]
 
-        im = Image.fromarray(recvbuf)
+        im = Image.fromarray(image)
         im.save(out_path)
 
 
