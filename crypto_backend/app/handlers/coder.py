@@ -1,0 +1,113 @@
+from aiohttp import web
+import numpy as np
+import base64
+from PIL import Image
+import io
+import random
+
+
+async def get_seed(key: str):
+    key_seed = 1
+    key = key.lower()
+    for i in range(len(key) - 1):
+        key_seed *= ord(key[i]) * (ord(key[i]) - ord(key[i + 1]))
+    return key_seed
+
+
+async def transform_base64_to_np_image(base64str: str):
+    decoded_image = base64.b64decode(base64str)
+    image = Image.open(io.BytesIO(decoded_image))
+    image.show()
+    return np.array(image)
+
+
+async def transform_np_image_to_base64(array: np.ndarray):
+    img = Image.fromarray(array)
+    img.save('out.bmp')
+    im_file = io.BytesIO()
+    img.save(im_file, format="BMP")
+    im_bytes = im_file.getvalue()
+    eq_image = await transform_base64_to_np_image(base64.b64encode(im_bytes).decode('utf-8'))
+    print(eq_image.shape)
+    # print(eq_image==array)
+    return base64.b64encode(im_bytes).decode('utf-8')
+
+
+async def encode(request):
+    data = await request.json()
+    try:
+        image = data['image']
+        key = data['key']
+        text = data['text']
+    except KeyError:
+        return web.Response(text="No required keys found", status=500)
+    print(f'key is: {key}')
+
+    image = await transform_base64_to_np_image(image)
+
+    img_size = image.shape[0] * image.shape[1]
+    text_size = len(text)
+    if text_size == 0:
+        return web.Response(text="Empty text file", status=500)
+    elif text_size > img_size:
+        return web.Response(text="Image is too small", status=500)
+    text += '\0'
+    text_size += 1
+
+    random.seed(get_seed(key))
+
+    wpixs = []
+    for i in range(text_size):
+        while True:
+            ix = random.randint(0, image.shape[0] - 1)
+            iy = random.randint(0, image.shape[1] - 1)
+            if (ix, iy) not in wpixs:
+                wpixs.append((ix, iy))
+                break
+        this_char = ord(text[i])
+        if this_char > 1000:
+            this_char -= 890  # for russian letters
+        #  rgb converting
+        image[ix, iy, 0] = (image[ix, iy, 0] & (0x1F << 3)) | ((this_char & 0xE0) >> 5)
+        image[ix, iy, 1] = (image[ix, iy, 1] & (0x3F << 2)) | ((this_char & 0x18) >> 3)
+        image[ix, iy, 2] = (image[ix, iy, 2] & (0x1F << 3)) | (this_char & 0x7)
+
+    return web.json_response({"data": await transform_np_image_to_base64(image)}, status=200)
+
+
+async def decode(request):
+    data = await request.json()
+    try:
+        image = data['image']
+        key = data['key']
+    except KeyError:
+        return web.Response(text="No required keys found", status=500)
+    print(f'key is: {key}')
+    image = await transform_base64_to_np_image(image)
+
+    random.seed(get_seed(key))
+    decrypt_text = ""
+
+    wpixs = []
+    while True:
+        while True:
+            ix = random.randint(0, image.shape[0] - 1)
+            iy = random.randint(0, image.shape[1] - 1)
+            if (ix, iy) not in wpixs:
+                wpixs.append((ix, iy))
+                break
+        thisChar = 0
+        thisChar |= ((image[ix, iy, 0] & 0x7) << 5)
+        thisChar |= ((image[ix, iy, 1] & 0x3) << 3)
+        thisChar |= (image[ix, iy, 2] & 0x7)
+
+        if thisChar > 130:
+            thisChar += 890
+        if thisChar == 0:
+            break
+        decrypt_text += chr(thisChar)
+        print(decrypt_text)
+        if len(decrypt_text) > 30:
+            break
+
+    return web.json_response({"data": decrypt_text}, status=200)
