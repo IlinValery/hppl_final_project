@@ -1,3 +1,4 @@
+import aiohttp
 from aiohttp import web
 import numpy as np
 import base64
@@ -5,8 +6,10 @@ from PIL import Image
 import io
 import random
 
+from aiohttp.abc import Request
 
-async def get_seed(key: str):
+
+def get_seed(key: str):
     key_seed = 1
     key = key.lower()
     for i in range(len(key) - 1):
@@ -17,31 +20,30 @@ async def get_seed(key: str):
 async def transform_base64_to_np_image(base64str: str):
     decoded_image = base64.b64decode(base64str)
     image = Image.open(io.BytesIO(decoded_image))
-    image.show()
     return np.array(image)
 
 
 async def transform_np_image_to_base64(array: np.ndarray):
     img = Image.fromarray(array)
-    img.save('out.bmp')
     im_file = io.BytesIO()
     img.save(im_file, format="BMP")
     im_bytes = im_file.getvalue()
-    eq_image = await transform_base64_to_np_image(base64.b64encode(im_bytes).decode('utf-8'))
-    print(eq_image.shape)
-    # print(eq_image==array)
-    return base64.b64encode(im_bytes).decode('utf-8')
+    return f'data:image/bmp;base64,{base64.b64encode(im_bytes).decode("utf-8")}'
 
 
-async def encode(request):
-    data = await request.json()
-    try:
-        image = data['image']
-        key = data['key']
-        text = data['text']
-    except KeyError:
+async def encode(request: Request):
+    image = None
+    key = None
+    text = None
+    async for field in (await request.multipart()):
+        if field.name == 'image':
+            image = (await field.read()).decode().split(',')[1]
+        if field.name == 'key':
+            key = (await field.read()).decode()
+        if field.name == 'text':
+            text = (await field.read()).decode()
+    if not (image and key and text):
         return web.Response(text="No required keys found", status=500)
-    print(f'key is: {key}')
 
     image = await transform_base64_to_np_image(image)
 
@@ -54,13 +56,14 @@ async def encode(request):
     text += '\0'
     text_size += 1
 
-    random.seed(get_seed(key))
+    generator = random.Random()
+    generator.seed(get_seed(key))
 
     wpixs = []
     for i in range(text_size):
         while True:
-            ix = random.randint(0, image.shape[0] - 1)
-            iy = random.randint(0, image.shape[1] - 1)
+            ix = generator.randint(0, image.shape[0] - 1)
+            iy = generator.randint(0, image.shape[1] - 1)
             if (ix, iy) not in wpixs:
                 wpixs.append((ix, iy))
                 break
@@ -72,27 +75,33 @@ async def encode(request):
         image[ix, iy, 1] = (image[ix, iy, 1] & (0x3F << 2)) | ((this_char & 0x18) >> 3)
         image[ix, iy, 2] = (image[ix, iy, 2] & (0x1F << 3)) | (this_char & 0x7)
 
-    return web.json_response({"data": await transform_np_image_to_base64(image)}, status=200)
+    return web.json_response({"image": await transform_np_image_to_base64(image)}, status=200)
 
 
 async def decode(request):
-    data = await request.json()
-    try:
-        image = data['image']
-        key = data['key']
-    except KeyError:
+    image = None
+    key = None
+    async for field in (await request.multipart()):
+        if field.name == 'image':
+            image = (await field.read()).decode().split(',')[1]
+        if field.name == 'key':
+            key = (await field.read()).decode()
+
+    if not (image and key):
         return web.Response(text="No required keys found", status=500)
-    print(f'key is: {key}')
+
     image = await transform_base64_to_np_image(image)
 
-    random.seed(get_seed(key))
+    generator = random.Random()
+    generator.seed(get_seed(key))
+
     decrypt_text = ""
 
     wpixs = []
     while True:
         while True:
-            ix = random.randint(0, image.shape[0] - 1)
-            iy = random.randint(0, image.shape[1] - 1)
+            ix = generator.randint(0, image.shape[0] - 1)
+            iy = generator.randint(0, image.shape[1] - 1)
             if (ix, iy) not in wpixs:
                 wpixs.append((ix, iy))
                 break
@@ -106,8 +115,8 @@ async def decode(request):
         if thisChar == 0:
             break
         decrypt_text += chr(thisChar)
-        print(decrypt_text)
-        if len(decrypt_text) > 30:
-            break
+        if len(decrypt_text) > 3e3:
+            print('Not correct key')
+            return web.json_response(data={'error': 'Not correct key'}, status=500)
 
-    return web.json_response({"data": decrypt_text}, status=200)
+    return web.json_response({"text": decrypt_text}, status=200)
