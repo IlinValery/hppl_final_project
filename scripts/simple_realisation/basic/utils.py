@@ -32,10 +32,10 @@ def shiftChannels(red, green, blue, shift_num):
     b += shift_num
 
     if b > 255:
-        g = g + b - 255
+        g = g + b - 256
         b = 0
         if g > 255:
-            r = r + g - 255
+            r = r + g - 256
             g = 0
             if r > 255:
                 r = 0
