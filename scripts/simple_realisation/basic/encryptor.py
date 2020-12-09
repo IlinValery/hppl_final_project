@@ -2,9 +2,11 @@ import argparse
 from PIL import Image
 from utils import channelsToOne, shiftChannels, flattenImageAndShift
 import numpy as np
+import cv2
 
 
 def encrypt(img, text, out_path):
+
     imageCrypt = img.copy()
 
     imgSize = imageCrypt.shape[0] * imageCrypt.shape[1]
@@ -12,13 +14,11 @@ def encrypt(img, text, out_path):
     for line in text:
         textSize += len(line)
 
-    print(textSize)
-
     assert textSize > 0, "Empty text file"
     assert textSize < imgSize, "Image is too small"
 
-    pixStep = np.floor(imageCrypt.shape[0] * imageCrypt.shape[1] / textSize)
-    pixStep = int(pixStep)
+    pixStep = imageCrypt.shape[0] * imageCrypt.shape[1] // textSize
+    # pixStep = int(pixStep)
     thisPix = 1
 
     # write the pixStep into the 0, 0 pixel in image
@@ -30,12 +30,13 @@ def encrypt(img, text, out_path):
 
     for line in text:
         for symbol in line:
+            # print(symbol)
             thisChar = ord(symbol)
             if thisChar > 1000:
                 thisChar -= 800  # костыль для русских букоф
 
             if thisChar > pixStep:  # вмещаем с остатком
-                whole = np.floor(thisChar / (pixStep - 1))
+                whole = thisChar // (pixStep - 1)
                 left = thisChar % (pixStep - 1)
                 for k in range(pixStep - 1):
                     index = thisPix + k
@@ -58,16 +59,18 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     #     group = parser.add_mutually_exclusive_group()
     parser.add_argument('-i', '--input-image', type=str, help='Path to the bmp/png image',
-                        default='../../../data/image.bmp')
+                        default='../../../data/original.bmp')
     parser.add_argument('-o', '--output-image', type=str, help='Path to the bmp/png image for saving',
                         default='../../../data/out.bmp')
     parser.add_argument('-f', '--file', type=str, help='Path to the txt file with message for encrypt',
-                        default='../../../data/texts/default.txt')
-    parser.add_argument('--c', '--show-clock', default=False, action='store_true')
+                        default='../../../data/texts/text.txt')
     args = parser.parse_args()
 
-    with open(args.file, "r") as f:
-        file_text = f.read()
-    image = np.array(Image.open(args.input_image).convert('RGB'))
+    lines = []
+    f = open(args.file)
+    for line in f:
+        lines.append(line)
+    image = cv2.imread(args.input_image)
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
-    encrypt(image, file_text, out_path=args.output_image)
+    encrypt(image, lines, out_path=args.output_image)

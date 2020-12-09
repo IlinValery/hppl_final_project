@@ -45,11 +45,11 @@ def flattenImageAndShift (image, item, shift_value):
     width = image.shape[0]
     height = image.shape[1]
     image = image.reshape((width * height, 3))
-    r = image[item, 0]
+    r = image[item, 2]
     g = image[item, 1]
-    b = image[item, 2]
+    b = image[item, 0]
 
     red, green, blue = shiftChannels(r, g, b, shift_value)
-    image[item, 0] = red
+    image[item, 2] = red
     image[item, 1] = green
-    image[item, 2] = blue
+    image[item, 0] = blue
