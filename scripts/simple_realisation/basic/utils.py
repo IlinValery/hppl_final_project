@@ -1,4 +1,5 @@
 import numpy as np
+import os
 
 
 def channelsToOne(red, green, blue):
@@ -53,3 +54,11 @@ def flattenImageAndShift (image, item, shift_value):
     image[item, 0] = red
     image[item, 1] = green
     image[item, 2] = blue
+
+
+def save_time(file_name, t1, t2, out_file):
+    mode = 'w'
+    if os.path.exists(out_file):
+        mode = 'a'
+    with open(out_file, mode) as f:
+        f.write(file_name + ' - ' + str(t2 - t1) + '\n')

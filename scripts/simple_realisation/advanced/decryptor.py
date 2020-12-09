@@ -1,8 +1,9 @@
 import random
 from PIL import Image
-from utils import getSeed
+from utils import getSeed, save_time
 import numpy as np
 import argparse
+import timeit
 
 
 def decrypt(image, key, out_path="decrypt_text.txt"):
@@ -35,7 +36,6 @@ def decrypt(image, key, out_path="decrypt_text.txt"):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-#     group = parser.add_mutually_exclusive_group()
     parser.add_argument('-i', '--input-image', type=str, help='Path to the bmp/png image', default='../../../data/outputs/out.bmp')
     parser.add_argument('-k', '--key', type=str, help='Path to the txt file with key', default='../../../data/key.txt')
     parser.add_argument('-f', '--file', type=str, help='Path to the txt file with decrypted message',
@@ -46,5 +46,8 @@ if __name__ == '__main__':
     with open(args.key, "r") as f:
         key = f.read()
     image = np.array(Image.open(args.input_image).convert('RGB'))
-    
+
+    t1 = timeit.default_timer()
     decrypt(image, key, out_path=args.file)
+    t2 = timeit.default_timer()
+    save_time(args.file.split('/')[-1], t1, t2, 'advanced_decryptor_times.txt')

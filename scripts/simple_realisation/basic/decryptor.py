@@ -1,6 +1,8 @@
 from argparse import ArgumentParser
 import numpy as np
 from PIL import Image
+from utils import save_time
+import timeit
 
 
 def decrypt(image_reference, image_crypted, out_path="decrypt_text.txt"):
@@ -56,9 +58,14 @@ if __name__ == '__main__':
                         type=str,
                         help='Path to a crypted image',
                         default='../../../data/basic/colored/crypted.bmp')
+    parser.add_argument('-f', '--file', type=str, help='Path to the txt file with decrypted message',
+                        default='../../../data/outputs/decrypt_txt.txt')
     args = parser.parse_args()
 
     image_reference = np.array(Image.open(args.image_ref_path).convert('RGB'))
     image_crypted = np.array(Image.open(args.image_crypt_path).convert('RGB'))
 
-    decrypt(image_reference, image_crypted)
+    t1 = timeit.default_timer()
+    decrypt(image_reference, image_crypted, out_path=args.file)
+    t2 = timeit.default_timer()
+    save_time(args.file.split('/')[-1], t1, t2, 'basic_decryptor_times.txt')
