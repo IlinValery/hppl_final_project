@@ -15,7 +15,7 @@ async def main(handler, iters, method='test'):
             task = asyncio.create_task(handler(session))
             tasks.append(task)
         await asyncio.gather(*tasks)
-    print(f"Spent time for testing request: {time.time() - t0} secs")
+    print(f"Spent {time.time() - t0} seconds for testing {iters} requests of method '{method}'")
 
 
 
@@ -32,8 +32,8 @@ if __name__ == "__main__":
 
     handler = r.test_connection
     if req_type == 'encode':
-        pass
+        handler = r.test_encoder
     elif req_type == 'decode':
-        pass
+        handler = r.test_decoder
 
-    asyncio.run(main(handler, amount))
+    asyncio.run(main(handler, amount, method=req_type))
