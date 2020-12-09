@@ -60,7 +60,7 @@ export default class EncryptPage extends React.Component {
         options.body.append('key', this.state.key)
 
 
-        fetch('/encode', options)
+        fetch('/api/encode', options)
             .then((response) => {
                 if (response.status !== 200) {
                     console.log('Looks like there was a problem. Status Code: ' +

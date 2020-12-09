@@ -81,7 +81,7 @@ export default class DecryptPage extends React.Component {
             wasSent: true,
             isOpenRes: true
         })
-        fetch('/decode', options)
+        fetch('/api/decode', options)
             .then((response) => {
                 if (response.status !== 200) {
                     console.log('Looks like there was a problem. Status Code: ' +
