@@ -76,7 +76,7 @@ if __name__ == '__main__':
     image = np.array(Image.open(args.input_image).convert('RGB'))
 
     t1 = timeit.default_timer()
-    encrypt(image, file_text, out_path=args.output_image)
+    encrypt(image, lines, out_path=args.output_image)
     t2 = timeit.default_timer()
     save_time(args.file.split('/')[-1], t1, t2, 'basic_encryptor_times.txt')
 
