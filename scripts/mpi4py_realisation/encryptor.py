@@ -1,5 +1,5 @@
 from PIL import Image
-from utils import getSeed
+from utils import getSeed, save_time
 import numpy as np
 import argparse
 from mpi4py import MPI
@@ -103,5 +103,8 @@ if __name__ == '__main__':
     with open(args.file, "r") as f:
         file_text = f.read()
     image = np.array(Image.open(args.input_image).convert('RGB'))
-    
+    t1 = MPI.Wtime()
     encrypt(image, file_text, key, out_path=args.output_image)
+    t2 = MPI.Wtime()
+    if rank == 0:
+        save_time(args.file.split('/')[-1], size, t1, t2, 'encryptor_times.txt')
