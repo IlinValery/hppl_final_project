@@ -74,4 +74,4 @@ if __name__ == '__main__':
     t1 = timeit.default_timer()
     encrypt(image, file_text, out_path=args.output_image)
     t2 = timeit.default_timer()
-    save_time(args.file.split('/')[-1], t1, t2, 'encryptor_times.txt')
+    save_time(args.file.split('/')[-1], t1, t2, 'basic_encryptor_times.txt')

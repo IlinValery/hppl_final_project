@@ -62,5 +62,5 @@ if __name__ == '__main__':
     t1 = timeit.default_timer()
     encrypt(image, file_text, key, out_path=args.output_image)
     t2 = timeit.default_timer()
-    save_time(args.file.split('/')[-1], t1, t2, 'encryptor_times.txt')
+    save_time(args.file.split('/')[-1], t1, t2, 'advanced_encryptor_times.txt')
 
