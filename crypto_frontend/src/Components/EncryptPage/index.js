@@ -119,7 +119,7 @@ export default class EncryptPage extends React.Component {
                 <Row>
                     <Col>
                         <Header text={this.props.text}/>
-                        <h6>If you are already have encrypted your message, use our <Button color={'link'}
+                        <h6>If you have already encrypted your message, use our <Button color={'link'}
                                                                                             onClick={() => {
                                                                                                 window.location.href = '/decrypt'
                                                                                             }}>decryptor</Button> to
