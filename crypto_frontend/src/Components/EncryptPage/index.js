@@ -11,7 +11,7 @@ import {
     Button,
     CustomInput,
     InputGroup,
-    InputGroupAddon
+    InputGroupAddon, FormText
 } from 'reactstrap';
 import Header from '../Header'
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
@@ -23,7 +23,10 @@ export default class EncryptPage extends React.Component {
 
         this.state = {
             isError: false,
-            isShown: false
+            isShown: false,
+            file: "",
+            key: "",
+            text: "",
         };
         this.fieldChange = this.fieldChange.bind(this);
         this.changeShownStatus = this.changeShownStatus.bind(this);
@@ -56,8 +59,15 @@ export default class EncryptPage extends React.Component {
 
 
             const reader = new FileReader();
-            reader.addEventListener("load", () =>
-                this.setState({file: reader.result})
+            reader.addEventListener("load", () => {
+                    let image = new Image();
+                    image.onload = () => {
+                        this.setState({maxTextLength: image.width * image.height});
+                    }
+                    image.src = reader.result;
+                    this.setState({file: reader.result});
+
+                }
             );
 
             reader.readAsDataURL(e.target.files[0]);
@@ -109,6 +119,11 @@ export default class EncryptPage extends React.Component {
                 <Row>
                     <Col>
                         <Header text={this.props.text}/>
+                        <h6>If you are already have encrypted your message, use our <Button color={'link'}
+                                                                                            onClick={() => {
+                                                                                                window.location.href = '/decrypt'
+                                                                                            }}>decryptor</Button> to
+                            decrypt it</h6>
                         <h4 style={{marginBottom: "32px"}}>
                             Please, input key, text and attach initial picture (<i>in *.bmp format</i>) below
                         </h4>
@@ -138,8 +153,16 @@ export default class EncryptPage extends React.Component {
                                         <Input type="textarea"
                                                onChange={this.fieldChange}
                                                name="text"
+                                               disabled={!this.state.maxTextLength}
+                                               maxlength={this.state.maxTextLength ? this.state.maxTextLength : 0}
+                                            // maxTextLength
                                                id="text"
                                                placeholder="Text for encrypting"/>
+                                        <FormText>
+                                            {this.state.maxTextLength ?
+                                                this.state.text.length + "/" + this.state.maxTextLength :
+                                                "Please, appload image to edit this field."}
+                                        </FormText>
                                     </Col>
                                 </Row>
                             </FormGroup>
@@ -155,12 +178,14 @@ export default class EncryptPage extends React.Component {
                                                 type="text"
                                                 autoComplete="new-password"
                                                 name="key"
+                                                disabled={!this.state.maxTextLength}
                                                 id="key"
                                                 className={this.state.isShown ? "" : "security-key"}
                                                 onChange={this.fieldChange}
                                                 placeholder="Key for encrypting"/>
                                             <InputGroupAddon addonType="append">
                                                 <Button color={this.state.isShown ? "danger" : "secondary"}
+                                                        disabled={!this.state.maxTextLength}
                                                         onClick={this.changeShownStatus}>
                                                     <FontAwesomeIcon icon={this.state.isShown ? "eye" : "eye-slash"}/>
                                                 </Button>
@@ -176,6 +201,11 @@ export default class EncryptPage extends React.Component {
                 <div className={"center-text"}>
                     <Button
                         size={'lg'}
+                        disabled={
+                            !(this.state.file.length > 0 &&
+                                this.state.key.length > 0 &&
+                                this.state.text.length > 0)
+                        }
                         onClick={() => this.sendDataEncoder()}
                         color="secondary">
                         Encrypt image!

@@ -127,6 +127,7 @@ export default class DecryptPage extends React.Component {
                 <Row>
                     <Col>
                         <Header text={this.props.text}/>
+                        <h6>If you haven't encrypted your message yet, use out encryptor<Button color={'link'} onClick={()=>{window.location.href = '/encrypt'}}>encryptor</Button></h6>
                         <h4 style={{marginBottom: "32px"}}>
                             Please, attach encrypted picture and put the key below
                         </h4>
@@ -180,6 +181,10 @@ export default class DecryptPage extends React.Component {
                 <div className={"center-text"}>
                     <Button
                         size={'lg'}
+                        disabled={
+                            !(this.state.file.length > 0 &&
+                                this.state.key.length > 0)
+                        }
                         onClick={() => this.sendDataDecoder()}
                         color="secondary">
                         Decrypt image!

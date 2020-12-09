@@ -3,6 +3,8 @@ import './style.css'
 import {Container, Row, Col, Button} from 'reactstrap';
 import Header from '../Header'
 import './style.css'
+import ExpTimer from "./Timer";
+
 
 export default class StartPage extends React.Component {
     constructor(props) {
@@ -46,6 +48,8 @@ export default class StartPage extends React.Component {
                             </Col>
                         </Row>
                 </Container>
+                <ExpTimer/>
+
             </Container>
         );
     }
