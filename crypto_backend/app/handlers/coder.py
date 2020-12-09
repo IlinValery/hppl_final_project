@@ -115,7 +115,7 @@ async def decode(request):
         if thisChar == 0:
             break
         decrypt_text += chr(thisChar)
-        if len(decrypt_text) > 3e3:
+        if len(decrypt_text) > 10e3:
             print('Not correct key')
             return web.json_response(data={'error': 'Not correct key'}, status=500)
 
