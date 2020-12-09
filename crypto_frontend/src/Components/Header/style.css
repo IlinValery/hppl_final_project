@@ -1,0 +1,13 @@
+.header_text {
+    font-family: Comfortaa, monospace;
+    font-style: normal;
+    font-weight: bold;
+    font-size: 55px;
+    line-height: 61px;
+    align-items: center;
+    text-align: center;
+    margin-top: 0;
+    /*margin-bottom: 10%;*/
+
+    color: #000000;
+}

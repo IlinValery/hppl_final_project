@@ -1,23 +1,32 @@
-import logo from './logo.svg';
 import './App.css';
+import StartPage from './Components/StartPage'
+import EncryptPage from './Components/EncryptPage'
+import DecryptPage from "./Components/DecryptPage";
+import {
+    BrowserRouter as Router,
+    Switch,
+    Route
+} from "react-router-dom";
+
+import React from "react";
+
 
 function App() {
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+        <Router>
+            <Switch>
+                <Route exact path="/">
+                    <StartPage text="Try our encrypting!"/>
+                </Route>
+                <Route exact path="/encrypt">
+                    <EncryptPage text="Encrypt your text into the image!" />
+                </Route>
+                <Route exact path="/decrypt">
+                    <DecryptPage text="Decrypt the text from the image!"/>
+                </Route>
+            </Switch>
+        </Router>
     </div>
   );
 }
