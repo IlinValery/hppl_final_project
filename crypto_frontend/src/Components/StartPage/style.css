@@ -1,4 +1,11 @@
-.page {
-    background: linear-gradient(180deg, #F0D5D5 0%, #C3E9CD 100%);
-    height: 100vh;
+.class-col {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    height: 100%;
+}
+
+.main-container {
+    display: flex;
 }

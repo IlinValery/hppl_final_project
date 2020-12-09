@@ -1,6 +1,5 @@
 import React from "react"
 import './style.css'
-import {Container, Row, Col, Form, FormGroup, Label, Input, Button} from 'reactstrap';
 
 export default class Index extends React.Component {
     constructor(props) {
@@ -11,11 +10,9 @@ export default class Index extends React.Component {
     }
     render() {
         return (
-            <Container fluid={false}>
-                <Row>
-                    <h1 className="header_text">{this.props.text}</h1>
-                </Row>
-            </Container>
+            <div style={{paddingBottom: "48px"}}>
+                <h1 className="header_text">{this.props.text}</h1>
+            </div>
         );
     }
 }
