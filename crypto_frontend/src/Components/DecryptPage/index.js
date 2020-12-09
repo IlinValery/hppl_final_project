@@ -12,10 +12,11 @@ import {
     CustomInput,
     Toast,
     ToastHeader,
-    ToastBody
+    ToastBody, InputGroup, InputGroupAddon
 } from 'reactstrap';
 import Header from '../Header'
 import './style.css'
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 
 export default class DecryptPage extends React.Component {
     constructor(props) {
@@ -24,10 +25,17 @@ export default class DecryptPage extends React.Component {
         this.state = {
             isError: false,
             isOpenRes: true,
-            wasSent:false
+            wasSent:false,
+            file: '',
+            key: ''
         };
         this.fieldChange = this.fieldChange.bind(this);
         this.closeResult = this.closeResult.bind(this);
+        this.changeShownStatus = this.changeShownStatus.bind(this);
+    }
+
+    changeShownStatus() {
+        this.setState({isShown: !this.state.isShown})
     }
 
     setFieldsToState(e) {
@@ -119,6 +127,7 @@ export default class DecryptPage extends React.Component {
                 <Row>
                     <Col>
                         <Header text={this.props.text}/>
+                        <h6>If you haven't encrypted your message yet, use out encryptor<Button color={'link'} onClick={()=>{window.location.href = '/encrypt'}}>encryptor</Button></h6>
                         <h4 style={{marginBottom: "32px"}}>
                             Please, attach encrypted picture and put the key below
                         </h4>
@@ -146,12 +155,22 @@ export default class DecryptPage extends React.Component {
                                         <Label for="key">Key</Label>
                                     </Col>
                                     <Col>
-                                        <Input type="input"
-                                               name="key"
-                                               id="key"
-                                               onChange={this.fieldChange}
-                                            // onClick={()=>{alert('TODO show/hide password')}}
-                                               placeholder="Key for encrypting"/>
+                                        <InputGroup>
+                                            <Input
+                                                type="text"
+                                                autoComplete="new-password"
+                                                name="key"
+                                                id="key"
+                                                className={this.state.isShown ? "" : "security-key"}
+                                                onChange={this.fieldChange}
+                                                placeholder="Key for encrypting"/>
+                                            <InputGroupAddon addonType="append">
+                                                <Button color={this.state.isShown ? "danger" : "secondary"}
+                                                        onClick={this.changeShownStatus}>
+                                                    <FontAwesomeIcon icon={this.state.isShown ? "eye" : "eye-slash"}/>
+                                                </Button>
+                                            </InputGroupAddon>
+                                        </InputGroup>
                                     </Col>
                                 </Row>
                             </FormGroup>
@@ -162,6 +181,10 @@ export default class DecryptPage extends React.Component {
                 <div className={"center-text"}>
                     <Button
                         size={'lg'}
+                        disabled={
+                            !(this.state.file.length > 0 &&
+                                this.state.key.length > 0)
+                        }
                         onClick={() => this.sendDataDecoder()}
                         color="secondary">
                         Decrypt image!

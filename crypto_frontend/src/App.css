@@ -13,10 +13,18 @@ h2 {
 h4 {
     text-align: center!important;
 }
+h6 {
+    text-align: center!important;
+}
 img {
     max-height: 250px !important;
 }
 
 dev.center {
     text-align: center !important;
+}
+
+.security-key {
+    -webkit-text-security: square;
+    letter-spacing: 2px;
 }

@@ -1,4 +1,5 @@
 import './App.css';
+import React from "react";
 import StartPage from './Components/StartPage'
 import EncryptPage from './Components/EncryptPage'
 import DecryptPage from "./Components/DecryptPage";
@@ -8,8 +9,10 @@ import {
     Route
 } from "react-router-dom";
 
-import React from "react";
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons'
 
+library.add(faEye, faEyeSlash)
 
 function App() {
   return (
