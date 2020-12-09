@@ -64,7 +64,7 @@ if __name__ == '__main__':
     parser.add_argument('-o', '--output-image', type=str, help='Path to the bmp/png image for saving',
                         default='../../../data/out.bmp')
     parser.add_argument('-f', '--file', type=str, help='Path to the txt file with message for encrypt',
-                        default='../../../data/texts/text_174.txt')
+                        default='../../../data/texts/default.txt')
     args = parser.parse_args()
 
     lines = []
