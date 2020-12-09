@@ -20,3 +20,8 @@ img {
 dev.center {
     text-align: center !important;
 }
+
+.security-key {
+    -webkit-text-security: square;
+    letter-spacing: 2px;
+}

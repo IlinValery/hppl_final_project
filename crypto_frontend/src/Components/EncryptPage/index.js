@@ -1,7 +1,20 @@
 import React from "react"
 import './style.css'
-import {Container, Row, Col, Form, FormGroup, Label, Input, Button, CustomInput} from 'reactstrap';
+import {
+    Container,
+    Row,
+    Col,
+    Form,
+    FormGroup,
+    Label,
+    Input,
+    Button,
+    CustomInput,
+    InputGroup,
+    InputGroupAddon
+} from 'reactstrap';
 import Header from '../Header'
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
 import './style.css'
 
 export default class EncryptPage extends React.Component {
@@ -9,9 +22,15 @@ export default class EncryptPage extends React.Component {
         super(props);
 
         this.state = {
-            isError: false
+            isError: false,
+            isShown: false
         };
         this.fieldChange = this.fieldChange.bind(this);
+        this.changeShownStatus = this.changeShownStatus.bind(this);
+    }
+
+    changeShownStatus() {
+        this.setState({isShown: !this.state.isShown})
     }
 
     setFieldsToState(e) {
@@ -131,12 +150,22 @@ export default class EncryptPage extends React.Component {
                                         <Label for="key">Key</Label>
                                     </Col>
                                     <Col>
-                                        <Input type="input"
-                                               name="key"
-                                               id="key"
-                                               onChange={this.fieldChange}
-                                            // onClick={()=>{alert('TODO show/hide password')}}
-                                               placeholder="Key for encrypting"/>
+                                        <InputGroup>
+                                            <Input
+                                                type="text"
+                                                autoComplete="new-password"
+                                                name="key"
+                                                id="key"
+                                                className={this.state.isShown ? "" : "security-key"}
+                                                onChange={this.fieldChange}
+                                                placeholder="Key for encrypting"/>
+                                            <InputGroupAddon addonType="append">
+                                                <Button color={this.state.isShown ? "danger" : "secondary"}
+                                                        onClick={this.changeShownStatus}>
+                                                    <FontAwesomeIcon icon={this.state.isShown ? "eye" : "eye-slash"}/>
+                                                </Button>
+                                            </InputGroupAddon>
+                                        </InputGroup>
                                     </Col>
                                 </Row>
                             </FormGroup>
@@ -156,7 +185,7 @@ export default class EncryptPage extends React.Component {
                 {this.state.file ?
                     <div>
                         <h2>Encryption preview</h2>
-                        <Row >
+                        <Row>
 
                             <Col>
                                 <h4>Original image</h4>
@@ -167,7 +196,8 @@ export default class EncryptPage extends React.Component {
                             <Col>
                                 {this.state.encodedFile ? <div>
                                     <h4>Encrypted image (tap to load)</h4>
-                                    <a download="encoded image.bmp" href={this.state.encodedFile} title={"Tap to download file!"}>
+                                    <a download="encoded image.bmp" href={this.state.encodedFile}
+                                       title={"Tap to download file!"}>
                                         <img id="encryptedRes" className="rounded mx-auto d-block"
 
                                              src={this.state.encodedFile} alt="Encrypted frame"/>

@@ -12,10 +12,11 @@ import {
     CustomInput,
     Toast,
     ToastHeader,
-    ToastBody
+    ToastBody, InputGroup, InputGroupAddon
 } from 'reactstrap';
 import Header from '../Header'
 import './style.css'
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 
 export default class DecryptPage extends React.Component {
     constructor(props) {
@@ -24,10 +25,17 @@ export default class DecryptPage extends React.Component {
         this.state = {
             isError: false,
             isOpenRes: true,
-            wasSent:false
+            wasSent:false,
+            file: '',
+            key: ''
         };
         this.fieldChange = this.fieldChange.bind(this);
         this.closeResult = this.closeResult.bind(this);
+        this.changeShownStatus = this.changeShownStatus.bind(this);
+    }
+
+    changeShownStatus() {
+        this.setState({isShown: !this.state.isShown})
     }
 
     setFieldsToState(e) {
@@ -146,12 +154,22 @@ export default class DecryptPage extends React.Component {
                                         <Label for="key">Key</Label>
                                     </Col>
                                     <Col>
-                                        <Input type="input"
-                                               name="key"
-                                               id="key"
-                                               onChange={this.fieldChange}
-                                            // onClick={()=>{alert('TODO show/hide password')}}
-                                               placeholder="Key for encrypting"/>
+                                        <InputGroup>
+                                            <Input
+                                                type="text"
+                                                autoComplete="new-password"
+                                                name="key"
+                                                id="key"
+                                                className={this.state.isShown ? "" : "security-key"}
+                                                onChange={this.fieldChange}
+                                                placeholder="Key for encrypting"/>
+                                            <InputGroupAddon addonType="append">
+                                                <Button color={this.state.isShown ? "danger" : "secondary"}
+                                                        onClick={this.changeShownStatus}>
+                                                    <FontAwesomeIcon icon={this.state.isShown ? "eye" : "eye-slash"}/>
+                                                </Button>
+                                            </InputGroupAddon>
+                                        </InputGroup>
                                     </Col>
                                 </Row>
                             </FormGroup>
