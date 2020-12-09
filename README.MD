@@ -33,4 +33,4 @@ b) Decryptor:
 </p>
 
 ### Try it!
-Solution is avail by link [http://imcryption.webtm.ru/)](http://imcryption.webtm.ru/) before 12/12/20
+Solution is avail by link [http://imcryption.webtm.ru/](http://imcryption.webtm.ru/) before 12/12/20
