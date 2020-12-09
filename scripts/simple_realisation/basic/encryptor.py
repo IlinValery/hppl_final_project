@@ -2,11 +2,9 @@ import argparse
 from PIL import Image
 from utils import channelsToOne, shiftChannels, flattenImageAndShift
 import numpy as np
-import cv2
 
 
 def encrypt(img, text, out_path):
-
     imageCrypt = img.copy()
 
     imgSize = imageCrypt.shape[0] * imageCrypt.shape[1]
@@ -18,7 +16,10 @@ def encrypt(img, text, out_path):
     assert textSize < imgSize, "Image is too small"
 
     pixStep = imageCrypt.shape[0] * imageCrypt.shape[1] // textSize
-    # pixStep = int(pixStep)
+    value = 256 - imageCrypt[0, 0, 0] + (256 - imageCrypt[0, 0, 1]) + (256 - imageCrypt[0, 0, 2])
+    if pixStep > value:
+        pixStep = value
+
     thisPix = 1
 
     # write the pixStep into the 0, 0 pixel in image
@@ -63,14 +64,14 @@ if __name__ == '__main__':
     parser.add_argument('-o', '--output-image', type=str, help='Path to the bmp/png image for saving',
                         default='../../../data/out.bmp')
     parser.add_argument('-f', '--file', type=str, help='Path to the txt file with message for encrypt',
-                        default='../../../data/texts/text.txt')
+                        default='../../../data/texts/text_174.txt')
     args = parser.parse_args()
 
     lines = []
     f = open(args.file)
     for line in f:
         lines.append(line)
-    image = cv2.imread(args.input_image)
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+    image = np.array(Image.open(args.input_image).convert('RGB'))
 
     encrypt(image, lines, out_path=args.output_image)
