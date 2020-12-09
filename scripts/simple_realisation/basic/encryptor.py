@@ -1,7 +1,8 @@
 import argparse
 from PIL import Image
-from utils import channelsToOne, shiftChannels, flattenImageAndShift
+from utils import channelsToOne, shiftChannels, flattenImageAndShift, save_time
 import numpy as np
+import timeit
 
 
 def encrypt(img, text, out_path):
@@ -70,4 +71,7 @@ if __name__ == '__main__':
         file_text = f.read()
     image = np.array(Image.open(args.input_image).convert('RGB'))
 
+    t1 = timeit.default_timer()
     encrypt(image, file_text, out_path=args.output_image)
+    t2 = timeit.default_timer()
+    save_time(args.file.split('/')[-1], t1, t2, 'encryptor_times.txt')

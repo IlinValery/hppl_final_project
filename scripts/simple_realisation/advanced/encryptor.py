@@ -1,8 +1,9 @@
 import random
 from PIL import Image
-from utils import getSeed
+from utils import getSeed, save_time
 import numpy as np
 import argparse
+import timeit
 
 
 def encrypt(input_img, text, key, out_path="crypt_image.bmp"):
@@ -57,9 +58,9 @@ if __name__ == '__main__':
     with open(args.file, "r") as f:
         file_text = f.read()
     image = np.array(Image.open(args.input_image).convert('RGB'))
-    
+
+    t1 = timeit.default_timer()
     encrypt(image, file_text, key, out_path=args.output_image)
-#     print(f'Following arguments was recognized: \n{args}')
-#     print(key)
-#     print(file_text)
-#     print(image.shape)
+    t2 = timeit.default_timer()
+    save_time(args.file.split('/')[-1], t1, t2, 'encryptor_times.txt')
+
