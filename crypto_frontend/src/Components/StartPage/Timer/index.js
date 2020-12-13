@@ -44,7 +44,7 @@ export default class ExpTimer extends React.Component {
         if (this.state.isOver) {
             return (
                 <Alert color={"success"} className={"text-center"}>
-                    <h3 className={"text-center"}>Our shop was closed</h3>
+                    <h3 className={"text-center"}>Our project is no longer active</h3>
                 </Alert>
 
             );
